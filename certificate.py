@@ -1,4 +1,6 @@
 import datetime
+import json
+import os
 import socket
 import ssl
 import logging
@@ -7,7 +9,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography import x509
 from cryptography.x509.oid import NameOID
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 from crl import fetch_crl, get_crl_distribution_points, is_certificate_revoked
 from models import Certificate
@@ -63,7 +65,6 @@ def get_certificate_info(domain: str) -> Certificate:
         logger.error(f"Ошибка при проверке {domain}: {e}")
         return Certificate("ERROR", domain, "UNKNOWN")
 
-
 def extract_certificate_info(domain: str, x509_cert: x509.Certificate, crl_urls) -> Certificate:
     """
     Извлекает из x509-сертификата данные и возвращает объект Certificate.
@@ -96,3 +97,39 @@ def extract_certificate_info(domain: str, x509_cert: x509.Certificate, crl_urls)
     #cert.set_crl_date()
 
     return cert
+
+def certificate_to_dict(cert: Certificate) -> Dict[str, Any]:
+    return {
+        "name": cert.name,
+        "domain": cert.domain,
+        "c_authority": cert.c_authority,
+        "revoke_status": cert.revoke_status,
+        "cert_create_date": cert.cert_create_date.isoformat() if cert.cert_create_date else None,
+        "cert_end_date": cert.cert_end_date.isoformat() if cert.cert_end_date else None,
+        "days_until_end": cert.days_until_end,
+        "crl": cert.crl,
+        "crl_last_update": [dt.isoformat() for dt in cert.crl_last_update],
+        "crl_next_update": [dt.isoformat() for dt in cert.crl_next_update],
+    }
+
+def save_certificates_to_file(
+        certificates: List[Certificate],
+        file_path: str = "/var/lib/zabbix/certificates.json"
+) -> bool:
+    try:
+        # Собираем список словарей
+        data_list = [certificate_to_dict(cert) for cert in certificates]
+        json_payload = json.dumps(data_list, ensure_ascii=False, indent=2)  # indent для читаемости
+
+        # Убедимся, что директория существует
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+        # Записываем в файл
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(json_payload)
+
+        print(f"JSON успешно сохранён в {file_path}")
+        return True
+    except Exception as e:
+        print(f"Ошибка при сохранении файла: {e}")
+        return False

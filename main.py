@@ -2,7 +2,10 @@ import argparse
 import sys
 import time
 import logging
+import os
+from pathlib import Path
 
+import certificate
 from domains import get_domains
 from log import setup_logging
 from certificate import get_certificate_info
@@ -40,6 +43,7 @@ def main():
         for domain in domains:
             cert_list.append(get_certificate_info(domain))
         get_all_certs(cert_list)
+        certificate.save_certificates_to_file(cert_list, Path(__file__).parent / 'cert.txt')
 
     if args.interval > 0:
         logger.info(f"Запуск периодической проверки каждые {args.interval} секунд.")
