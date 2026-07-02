@@ -42,10 +42,14 @@ def get_certificate_info(domain: str) -> Certificate:
             parsed = urlparse(url)
             if parsed.scheme not in ('http', 'https'):
                 continue  # только HTTP/HTTPS поддерживаем
+
             crl = fetch_crl(url)
 
             if crl is None:
                 continue
+
+            cert_info.add_crl_date(crl)
+
             if is_certificate_revoked(x509_cert, crl):
                 logger.info(f"Сертификат {domain} ОТОЗВАН (CRL: {url})")
                 cert_info.revoke_status = 1
@@ -53,7 +57,6 @@ def get_certificate_info(domain: str) -> Certificate:
 
         logger.info(f"Сертификат {domain} действителен (не найден в CRL)")
         cert_info.revoke_status = 0
-
         return cert_info
 
     except Exception as e:

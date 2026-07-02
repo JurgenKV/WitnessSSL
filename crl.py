@@ -8,6 +8,8 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import ExtensionOID
 
+from models import Certificate
+
 logger = logging.getLogger(__name__)
 
 # Кеш для CRL: {url: (crl_object, next_update, fetch_time)}
@@ -57,6 +59,7 @@ def fetch_crl(url: str) -> Optional[x509.CertificateRevocationList]:
 
         CRL_CACHE[url] = (crl, next_update, now)
         logger.debug(f"CRL загружен и закеширован: {url}")
+
         return crl
     except Exception as e:
         logger.error(f"Не удалось загрузить CRL {url}: {e}")
