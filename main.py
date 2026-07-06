@@ -4,8 +4,11 @@ import time
 import logging
 import os
 from pathlib import Path
+from datetime import datetime, timezone, timedelta
+from typing import Optional
 
 import certificate
+from crl import next_scheduled_time, get_next_crl_update
 from domains import get_domains
 from log import setup_logging
 from certificate import get_certificate_info
@@ -22,38 +25,43 @@ def main():
     parser.add_argument('--verbose', '-v', action='store_true', help='Подробный вывод')
     args = parser.parse_args()
 
-    # Настройка логирования
     setup_logging(args.verbose)
     if args.verbose:
         logger.setLevel(logging.DEBUG)
-    logger.info("")
     logger.info("СКРИПТ ЗАПУЩЕН.")
-    # Собираем список доменов
-    domains = []
-    domains = get_domains(args)
 
+    domains = get_domains(args)
     if not domains:
         logger.error("Не указаны домены для проверки.")
         sys.exit(1)
 
-    # Удаляем возможные дубликаты и пустые строки
     domains = list(set([d.strip() for d in domains if d.strip()]))
     logger.info(f"Домены для проверки: {', '.join(domains)}")
-    cert_list = []
-    def run_check():
-        for domain in domains:
-            cert_list.append(get_certificate_info(domain))
-        get_all_certs(cert_list)
-        certificate.save_certificates_to_file(cert_list, Path(__file__).parent / 'Json/cert.txt')
 
-    if args.interval > 0:
-        logger.info(f"Запуск периодической проверки каждые {args.interval} секунд.")
+    if args.interval == 0:
+        logger.info("Запуск в режиме демона с учётом расписания и обновлений CRL.")
         while True:
-            run_check()
-            logger.info(f"Ожидание {args.interval} секунд до следующей проверки...")
-            time.sleep(args.interval)
+            run_check(domains)
+            now = datetime.now(timezone.utc)
+            t0 = next_scheduled_time(0)
+            t12 = next_scheduled_time(12)
+            next_schedule = min(t0, t12)
+            next_crl = get_next_crl_update()
+            next_event = next_crl if (next_crl is not None and next_crl < next_schedule) else next_schedule
+            wait_seconds = (next_event - now).total_seconds()
+            if wait_seconds < 0:
+                wait_seconds = 0
+            logger.info(f"Ожидание {wait_seconds:.0f} секунд до следующего запуска ({next_event.strftime('%Y-%m-%d %H:%M:%S UTC')})")
+            time.sleep(wait_seconds)
     else:
-        run_check()
+        run_check(domains)
+
+def run_check(domains):
+    cert_list = []
+    for domain in domains:
+        cert_list.append(get_certificate_info(domain))
+    get_all_certs(cert_list)
+    certificate.save_certificates_to_file(cert_list, Path(__file__).parent / 'Json/cert.txt')
 
 if __name__ == '__main__':
     main()

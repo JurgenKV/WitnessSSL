@@ -7,7 +7,7 @@ LOGGING_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 LOGGING_LEVEL = logging.INFO
 
 
-def setup_logging(verbose: bool = False, log_to_file: bool = True, log_dir: str = "Logs"):
+def setup_logging(verbose: bool = False, log_to_file: bool = True, log_dir: str = "logs"):
     """
     Настройка логирования.
 

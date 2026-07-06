@@ -95,6 +95,26 @@ def fetch_crl(url: str) -> Optional[x509.CertificateRevocationList]:
         logger.exception(f"Неожиданная ошибка при загрузке CRL {url}")
         return None
 
+def next_scheduled_time(hours: int) -> datetime:
+    now = datetime.now(timezone.utc)
+    candidate = now.replace(hour=hours, minute=0, second=0, microsecond=0)
+    if candidate <= now:
+        candidate += timedelta(days=1)
+    return candidate
+
+def get_next_crl_update() -> Optional[datetime]:
+    now = datetime.now(timezone.utc)
+    min_update = None
+    logger.debug("Поиск ближайшего обновления CRL в кеше...")
+    for url, (crl, next_update, fetch_time) in CRL_CACHE.items():
+        if next_update is not None and next_update > now:
+            if min_update is None or next_update < min_update:
+                min_update = next_update
+    if min_update:
+        logger.info(f"Ближайшее обновление CRL: {min_update.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+    else:
+        logger.info("Нет доступных CRL с будущим обновлением.")
+    return min_update
 
 def is_certificate_revoked(cert: x509.Certificate, crl: x509.CertificateRevocationList) -> bool:
     """
