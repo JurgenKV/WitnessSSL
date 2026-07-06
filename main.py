@@ -26,7 +26,8 @@ def main():
     setup_logging(args.verbose)
     if args.verbose:
         logger.setLevel(logging.DEBUG)
-
+    logger.info("")
+    logger.info("СКРИПТ ЗАПУЩЕН.")
     # Собираем список доменов
     domains = []
     domains = get_domains(args)
@@ -43,7 +44,7 @@ def main():
         for domain in domains:
             cert_list.append(get_certificate_info(domain))
         get_all_certs(cert_list)
-        certificate.save_certificates_to_file(cert_list, Path(__file__).parent / 'cert.txt')
+        certificate.save_certificates_to_file(cert_list, Path(__file__).parent / 'Json/cert.txt')
 
     if args.interval > 0:
         logger.info(f"Запуск периодической проверки каждые {args.interval} секунд.")
