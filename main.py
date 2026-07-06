@@ -38,7 +38,7 @@ def main():
     domains = list(set([d.strip() for d in domains if d.strip()]))
     logger.info(f"Домены для проверки: {', '.join(domains)}")
 
-    if args.interval == 0:
+    if args.interval > 0:
         logger.info("Запуск в режиме демона с учётом расписания и обновлений CRL.")
         while True:
             run_check(domains)
