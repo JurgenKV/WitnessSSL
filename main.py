@@ -61,7 +61,7 @@ def run_check(domains):
     for domain in domains:
         cert_list.append(get_certificate_info(domain))
     get_all_certs(cert_list)
-    certificate.save_certificates_to_file(cert_list, Path(__file__).parent / 'Json/cert.txt')
+    certificate.save_certificates_to_file(cert_list, Path(__file__).parent / 'Json/cert.json')
 
 if __name__ == '__main__':
     main()

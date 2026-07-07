@@ -1,4 +1,3 @@
-# utils.py
 from typing import List
 from models import Certificate
 
