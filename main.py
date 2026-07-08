@@ -40,7 +40,7 @@ def main():
     logger.info(f"Домены для проверки: {', '.join(domains)}")
 
     run_check(domains)
-    #recheck_by_scheduler() # LINUX
+    recheck_by_scheduler() # LINUX
 
     # if args.interval:
     #     logger.info("Запуск в режиме демона с учётом расписания и обновлений CRL.")
