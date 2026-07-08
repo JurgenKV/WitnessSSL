@@ -1,7 +1,8 @@
 import logging
 import re
-from typing import List
 
+from typing import List
+from main import DOMAINS_FILE
 logger = logging.getLogger(__name__)
 
 
@@ -13,7 +14,7 @@ def get_domains(args):
         domains = args.domains
     else:
         # Константный файл.
-        domains = read_domains_from_file("TEST_config.config")
+        domains = read_domains_from_file(DOMAINS_FILE)
 
     return domains
 

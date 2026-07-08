@@ -1,20 +1,17 @@
 import logging
+import requests
+
 from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from urllib.parse import urlparse
-
-import requests
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import ExtensionOID
-
-from models import Certificate
 
 logger = logging.getLogger(__name__)
 
 # Кеш для CRL: {url: (crl_object, next_update, fetch_time)}
 CRL_CACHE = {}
-
 
 def get_crl_distribution_points(cert: x509.Certificate) -> List[str]:
     """
@@ -102,19 +99,28 @@ def next_scheduled_time(hours: int) -> datetime:
         candidate += timedelta(days=1)
     return candidate
 
-def get_next_crl_update() -> Optional[datetime]:
+def get_next_crl_update(count_of_dates: int = 5) -> List[datetime]:
     now = datetime.now(timezone.utc)
-    min_update = None
-    logger.debug("Поиск ближайшего обновления CRL в кеше...")
+    future_updates = []
+
+    logger.debug("Поиск ближайших обновлений CRL в кеше...")
     for url, (crl, next_update, fetch_time) in CRL_CACHE.items():
         if next_update is not None and next_update > now:
-            if min_update is None or next_update < min_update:
-                min_update = next_update
-    if min_update:
-        logger.info(f"Ближайшее обновление CRL: {min_update.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+            future_updates.append(next_update)
+
+    future_updates.sort()
+    nearest_five = future_updates[:count_of_dates]
+
+    if nearest_five:
+        logger.info(
+            f"Найдено {len(nearest_five)} ближайших обновлений CRL: "
+            + ", ".join(d.strftime('%Y-%m-%d %H:%M:%S UTC') for d in nearest_five)
+        )
     else:
         logger.info("Нет доступных CRL с будущим обновлением.")
-    return min_update
+
+    return nearest_five
+
 
 def is_certificate_revoked(cert: x509.Certificate, crl: x509.CertificateRevocationList) -> bool:
     """

@@ -4,12 +4,11 @@ import os
 import socket
 import ssl
 import logging
-import traceback
 
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.x509.oid import NameOID
-from typing import Optional, List, Dict, Any
+from typing import List, Dict, Any
 
 from crl import fetch_crl, get_crl_distribution_points, is_certificate_revoked
 from models import Certificate

@@ -22,8 +22,9 @@ def setup_logging(verbose: bool = False, log_to_file: bool = True, log_dir: str 
 
     if log_to_file:
         os.makedirs(log_dir, exist_ok=True)
+        check_logs_count(log_dir, max_files=10)
 
-        log_filename = datetime.now().strftime("%d-%m-%Y") + ".txt"
+        log_filename = datetime.now().strftime("%Y-%m-%d") + ".txt"
         log_path = os.path.join(log_dir, log_filename)
 
         file_handler = logging.FileHandler(log_path, encoding='utf-8')
@@ -33,3 +34,21 @@ def setup_logging(verbose: bool = False, log_to_file: bool = True, log_dir: str 
         logging.getLogger().addHandler(file_handler)
 
     return logger
+
+def check_logs_count(log_dir: str = "logs", max_files: int = 10) -> None:
+    if not os.path.exists(log_dir):
+        return
+
+    files = [
+        f for f in os.listdir(log_dir)
+        if os.path.isfile(os.path.join(log_dir, f)) and f.endswith(".txt")
+    ]
+    files.sort()
+
+    while len(files) >= max_files:
+        oldest = files.pop(0)
+        file_path = os.path.join(log_dir, oldest)
+        try:
+            os.remove(file_path)
+        except OSError as e:
+            logging.warning(f"Не удалось удалить старый лог-файл {oldest}: {e}")

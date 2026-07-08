@@ -1,9 +1,8 @@
 """
 import json
-from typing import Dict, List
-
 import requests
 
+from typing import Dict, List
 from certificate import certificate_to_dict
 from models import Certificate
 
