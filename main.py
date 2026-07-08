@@ -20,7 +20,7 @@ def main():
     parser = argparse.ArgumentParser(description="Проверка SSL-сертификатов по CRL")
     parser.add_argument('domains', nargs='*', help='Список доменов для проверки')
     parser.add_argument('--file', '-f', help='Файл со списком доменов (по одному на строку)')
-    parser.add_argument('--interval', '-i', type=int, default=0,
+    parser.add_argument('--interval', '-i', type=bool, default=True,
                         help='Интервал проверки в секундах (0 – однократная проверка)')
     parser.add_argument('--verbose', '-v', action='store_true', help='Подробный вывод')
     args = parser.parse_args()
@@ -38,7 +38,7 @@ def main():
     domains = list(set([d.strip() for d in domains if d.strip()]))
     logger.info(f"Домены для проверки: {', '.join(domains)}")
 
-    if args.interval > 0:
+    if args.interval:
         logger.info("Запуск в режиме демона с учётом расписания и обновлений CRL.")
         while True:
             run_check(domains)
