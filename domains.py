@@ -2,9 +2,9 @@ import logging
 import re
 
 from typing import List
-from main import DOMAINS_FILE
-logger = logging.getLogger(__name__)
 
+from const import DOMAINS_FILE
+logger = logging.getLogger(__name__)
 
 def get_domains(args):
     # Файл при передаче параметров (названия файла) через консоль

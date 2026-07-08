@@ -17,8 +17,6 @@ from utils import get_all_certs
 
 logger = logging.getLogger(__name__)
 
-DOMAINS_FILE = '/etc/nginx/conf.d/checker.conf'
-
 def main():
     parser = argparse.ArgumentParser(description="Проверка SSL-сертификатов по CRL")
     parser.add_argument('domains', nargs='*', help='Список доменов для проверки')
