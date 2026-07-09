@@ -1,11 +1,12 @@
 import datetime
+from datetime import timezone
 
 from typing import List
 from cryptography.x509 import CertificateRevocationList
 
 class Certificate:
-    def __init__(self, name: str, domain: str, c_authority: str):
-        self.name = name
+    def __init__(self, cert_name: str, domain: str, c_authority: str):
+        self.cert_name = cert_name
         self.domain = domain
         self.c_authority = c_authority
         self.revoke_status = 2
@@ -15,6 +16,7 @@ class Certificate:
         self.crl = "UNKNOWN"
         self.crl_last_update: List[datetime.datetime] = []
         self.crl_next_update: List[datetime.datetime] = []
+        self.obj_create_date = datetime.datetime.now(timezone.utc)
 
     def set_crl(self, crl: str):
         self.crl = crl

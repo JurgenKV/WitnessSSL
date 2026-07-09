@@ -134,21 +134,21 @@ def certificate_to_dict(cert: Certificate) -> Dict[str, Any]:
     """
     try:
         return {
-            "name": cert.name,
+            "cert_name": cert.cert_name,
             "domain": cert.domain,
             "c_authority": cert.c_authority,
             "revoke_status": cert.revoke_status,
-            "cert_create_date": cert.cert_create_date.isoformat() if cert.cert_create_date else None,
-            "cert_end_date": cert.cert_end_date.isoformat() if cert.cert_end_date else None,
+            "cert_create_date": cert.cert_create_date.timestamp() if cert.cert_create_date else 0,
+            "cert_end_date": cert.cert_end_date.timestamp() if cert.cert_end_date else 0,
             "days_until_end": cert.days_until_end,
             "crl": cert.crl,
-            "crl_last_update": [dt.isoformat() for dt in cert.crl_last_update],
-            "crl_next_update": [dt.isoformat() for dt in cert.crl_next_update],
+            "crl_last_update": [dt.timestamp() for dt in cert.crl_last_update],
+            "crl_next_update": [dt.timestamp() for dt in cert.crl_next_update],
+            "obj_create_date": cert.obj_create_date.timestamp() if cert.obj_create_date else 0,
         }
     except Exception as e:
         logger.exception(f"Ошибка преобразования сертификата {cert.domain} в словарь")
         raise
-
 
 def save_certificates_to_file(
         certificates: List[Certificate],
