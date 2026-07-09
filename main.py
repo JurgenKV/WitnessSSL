@@ -66,14 +66,14 @@ def run_check(domains):
     for domain in domains:
         cert_list.append(get_certificate_info(domain))
     #get_all_certs(cert_list)
-    certificate.save_certificates_to_file(cert_list, str(Path(__file__).parent / 'Json/certificate_date.json'))
+    certificate.save_certificates_to_file(cert_list, str(Path(__file__).resolve().parent / 'Json/certificate_date.json'))
 
 ######## ONLY LINUX ########
 def recheck_by_scheduler():
     next_crl_updates = get_next_crl_update(5)
     schedule_crl_updates(next_crl_updates)
 
-def schedule_crl_updates(dates: List[datetime], script_path = str(Path(__file__).parent)):
+def schedule_crl_updates(dates: List[datetime], script_path = str(Path(__file__).resolve().parent)):
     remove_jobs_cmd = "for job in $(atq | awk '{print $1}'); do atrm $job; done"
     subprocess.run(remove_jobs_cmd, shell=True, check=False)
 
