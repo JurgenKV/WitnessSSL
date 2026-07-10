@@ -120,8 +120,11 @@ def extract_certificate_info(domain: str, x509_cert: x509.Certificate, crl_urls)
     crl = crl_urls
     logger.debug(f"CRL URLs: {crl}")
 
+    # 6. Серийный номер сертификата
+    serial_number = x509_cert.serial_number
+
     # Создаём объект
-    cert = Certificate(name, domain, c_authority=c_authority)
+    cert = Certificate(name, domain, c_authority, serial_number)
     cert.set_cert_date(cert_create_date, cert_end_date, days_until_end)
     cert.set_crl(crl)
 
@@ -138,13 +141,14 @@ def certificate_to_dict(cert: Certificate) -> Dict[str, Any]:
             "domain": cert.domain,
             "c_authority": cert.c_authority,
             "revoke_status": cert.revoke_status,
-            "cert_create_date": cert.cert_create_date.timestamp() if cert.cert_create_date else 0,
-            "cert_end_date": cert.cert_end_date.timestamp() if cert.cert_end_date else 0,
+            "serial_number": cert.serial_number if cert.serial_number else 0,
+            "cert_create_date": int(cert.cert_create_date.timestamp()) if cert.cert_create_date else 0,
+            "cert_end_date": int(cert.cert_end_date.timestamp()) if cert.cert_end_date else 0,
             "days_until_end": cert.days_until_end,
             "crl": cert.crl,
-            "crl_last_update": [dt.timestamp() for dt in cert.crl_last_update],
-            "crl_next_update": [dt.timestamp() for dt in cert.crl_next_update],
-            "obj_create_date": cert.obj_create_date.timestamp() if cert.obj_create_date else 0,
+            "crl_last_update": int(cert.crl_last_update.timestamp()) if cert.crl_last_update else 0,
+            "crl_next_update": int(cert.crl_next_update.timestamp()) if cert.crl_next_update else 0,
+            "obj_create_date": int(cert.obj_create_date.timestamp()) if cert.obj_create_date else 0,
         }
     except Exception as e:
         logger.exception(f"Ошибка преобразования сертификата {cert.domain} в словарь")

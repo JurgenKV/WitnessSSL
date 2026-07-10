@@ -1,21 +1,21 @@
 import datetime
 from datetime import timezone
 
-from typing import List
 from cryptography.x509 import CertificateRevocationList
 
 class Certificate:
-    def __init__(self, cert_name: str, domain: str, c_authority: str):
+    def __init__(self, cert_name: str, domain: str, c_authority: str, serial_number: int):
         self.cert_name = cert_name
         self.domain = domain
         self.c_authority = c_authority
+        self.serial_number = serial_number
         self.revoke_status = 2
         self.cert_create_date = None
         self.cert_end_date = None
         self.days_until_end = 0
         self.crl = "UNKNOWN"
-        self.crl_last_update: List[datetime.datetime] = []
-        self.crl_next_update: List[datetime.datetime] = []
+        self.crl_last_update = None
+        self.crl_next_update = None
         self.obj_create_date = datetime.datetime.now(timezone.utc)
 
     def set_crl(self, crl: str):
@@ -27,8 +27,18 @@ class Certificate:
         self.days_until_end = days_until_end
 
     def add_crl_date(self, crl: CertificateRevocationList):
-        self.crl_last_update.append(crl.last_update_utc)
-        self.crl_next_update.append(crl.next_update_utc)
+        if self.crl_last_update is None:
+            self.crl_last_update = crl.last_update_utc
+
+        if self.crl_next_update is None:
+            self.crl_next_update = crl.next_update_utc
+
+        if self.crl_last_update.timestamp() > crl.last_update_utc.timestamp():
+            self.crl_last_update = crl.last_update_utc
+
+        if self.crl_next_update.timestamp() > crl.next_update_utc.timestamp():
+            self.crl_next_update = crl.next_update_utc
+
 
 # REVOKE_STATUS
 # 0 - Не отозван. Все ок

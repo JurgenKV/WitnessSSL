@@ -131,7 +131,7 @@ def is_certificate_revoked(cert: x509.Certificate, crl: x509.CertificateRevocati
     try:
         for revoked_cert in crl:
             if revoked_cert.serial_number == serial:
-                logger.debug(f"Серийный номер {serial} найден в CRL — сертификат отозван")
+                logger.warning(f"Серийный номер {serial} найден в CRL — сертификат отозван")
                 return True
         logger.debug(f"Серийный номер {serial} не найден в CRL")
         return False
