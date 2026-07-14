@@ -86,7 +86,7 @@ def get_certificate_info(domain: str) -> Certificate:
 
     except Exception as e:
         logger.exception(f"Критическая ошибка при проверке {domain}")
-        return Certificate("ERROR", domain, "UNKNOWN")
+        return Certificate("ERROR", domain, "UNKNOWN", "0")
 
 
 def extract_certificate_info(domain: str, x509_cert: x509.Certificate, crl_urls) -> Certificate:
@@ -124,7 +124,7 @@ def extract_certificate_info(domain: str, x509_cert: x509.Certificate, crl_urls)
     serial_number = x509_cert.serial_number
 
     # Создаём объект
-    cert = Certificate(name, domain, c_authority, serial_number)
+    cert = Certificate(name, domain, c_authority, str(serial_number))
     cert.set_cert_date(cert_create_date, cert_end_date, days_until_end)
     cert.set_crl(crl)
 
@@ -141,7 +141,7 @@ def certificate_to_dict(cert: Certificate) -> Dict[str, Any]:
             "domain": cert.domain,
             "c_authority": cert.c_authority,
             "revoke_status": cert.revoke_status,
-            "serial_number": cert.serial_number if cert.serial_number else 0,
+            "serial_number": cert.serial_number,
             "cert_create_date": int(cert.cert_create_date.timestamp()) if cert.cert_create_date else 0,
             "cert_end_date": int(cert.cert_end_date.timestamp()) if cert.cert_end_date else 0,
             "days_until_end": cert.days_until_end,

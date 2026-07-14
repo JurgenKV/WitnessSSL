@@ -4,7 +4,7 @@ from datetime import timezone
 from cryptography.x509 import CertificateRevocationList
 
 class Certificate:
-    def __init__(self, cert_name: str, domain: str, c_authority: str, serial_number: int):
+    def __init__(self, cert_name: str, domain: str, c_authority: str, serial_number: str):
         self.cert_name = cert_name
         self.domain = domain
         self.c_authority = c_authority
