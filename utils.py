@@ -20,3 +20,17 @@ def get_all_certs(certificates: List[Certificate]):
          logger.info(f"CRL NEXT UPDATE: {cert.crl_next_update}")
          logger.info(f"OBJ CREATE DATE: {cert.obj_create_date}")
 
+def get_all_certs_by_format(certificates: List[Certificate]):
+    for cert in certificates:
+        #print("---")
+        #print(f"ИМЯ СЕРТИФИКАТА: {cert.cert_name}")
+        #print(f"ДОМЕН: {cert.domain}")
+        #print(f"ЦЕНТР СЕРТИФИКАЦИИ: {cert.c_authority}")
+        #print(f"СОЗДАНИЯ СЕРТИФИКАТА: {cert.cert_create_date}")
+        #print(f"ОКОНЧАНИЯ СЕРТИФИКАТА: {cert.cert_end_date}")
+
+        #print("---")
+        #print(f"ИМЯ СЕРТИФИКАТА: {cert.cert_name}")
+        print(f"{cert.domain} /{cert.c_authority} /{cert.cert_create_date}")
+        #print(f"ОКОНЧАНИЯ СЕРТИФИКАТА: {cert.cert_end_date}")
+

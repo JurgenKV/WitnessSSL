@@ -1,13 +1,13 @@
 import logging
 import os
 from datetime import datetime
-
+import const
 # Настройка логирования по умолчанию
 LOGGING_FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 LOGGING_LEVEL = logging.INFO
 
 
-def setup_logging(verbose: bool = False, log_to_file: bool = True, log_dir: str = "logs"):
+def setup_logging(verbose: bool = False, log_to_file: bool = True, log_dir: str = const.LOGS_PATH):
     """
     Настройка логирования.
 
@@ -35,7 +35,7 @@ def setup_logging(verbose: bool = False, log_to_file: bool = True, log_dir: str 
 
     return logger
 
-def check_logs_count(log_dir: str = "logs", max_files: int = 10) -> None:
+def check_logs_count(log_dir: str = const.LOGS_PATH, max_files: int = 10) -> None:
     if not os.path.exists(log_dir):
         return
 

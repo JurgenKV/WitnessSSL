@@ -13,7 +13,7 @@ from crl import next_scheduled_time, get_next_crl_update
 from domains import get_domains
 from log import setup_logging
 from certificate import get_certificate_info
-from utils import get_all_certs
+from utils import get_all_certs, get_all_certs_by_format
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def main():
         logger.error("Не указаны домены для проверки.")
         sys.exit(1)
 
-    domains = list(set([d.strip() for d in domains if d.strip()]))
+    domains = list(dict.fromkeys([d.strip() for d in domains if d.strip()])) ## порядок важен
     logger.info(f"Домены для проверки: {', '.join(domains)}")
 
     run_check(domains)
@@ -67,6 +67,7 @@ def run_check(domains):
         cert_list.append(get_certificate_info(domain))
     certificate.save_certificates_to_file(cert_list, str(Path(__file__).resolve().parent / 'Json/certificate_date.json'))
     get_all_certs(cert_list)
+    #get_all_print(cert_list)
 
 ######## ONLY LINUX ########
 def recheck_by_scheduler():
