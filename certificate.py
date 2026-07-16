@@ -35,7 +35,8 @@ def get_certificate_from_domain(domain: str, port: int = 443) -> x509.Certificat
                 return cert
     except Exception as e:
         logger.exception(f"Ошибка при получении сертификата для {domain}:{port}")
-        raise  # пробрасываем исключение дальше, чтобы обработать на уровне выше
+        logger.exception(f"{str(e)}")
+        return None  # вместо raise
 
 
 def get_certificate_info(domain: str) -> Certificate:
@@ -46,11 +47,16 @@ def get_certificate_info(domain: str) -> Certificate:
     logger.info(f"Начало проверки сертификата для домена: {domain}")
     try:
         x509_cert = get_certificate_from_domain(domain)
+        crl_urls = []
         logger.debug(f"Получен X.509 сертификат для {domain}")
+
+        if x509_cert is None:
+            cert_info = extract_certificate_info(domain, x509_cert, crl_urls)
+            cert_info.revoke_status = 3
+            return cert_info
 
         crl_urls = get_crl_distribution_points(x509_cert)
         logger.debug(f"Для {domain} найдено {len(crl_urls)} точек распространения CRL")
-
         cert_info = extract_certificate_info(domain, x509_cert, crl_urls)
 
         if not cert_info.crl:
@@ -86,15 +92,20 @@ def get_certificate_info(domain: str) -> Certificate:
 
     except Exception as e:
         logger.exception(f"Критическая ошибка при проверке {domain}")
-        return Certificate("ERROR", domain, "UNKNOWN", "0")
+        cert = Certificate("ERROR", domain, "UNKNOWN", "0")
+        cert.revoke_status = 5
+        return cert
 
 
 def extract_certificate_info(domain: str, x509_cert: x509.Certificate, crl_urls) -> Certificate:
     """
     Извлекает из x509-сертификата данные и возвращает объект Certificate.
     """
-    logger.debug(f"Извлечение информации из сертификата для {domain}")
+    if x509_cert is None:
+        cert = Certificate("ERROR", domain, "UNKNOWN", "0")
+        return cert
 
+    logger.debug(f"Извлечение информации из сертификата для {domain}")
     # 1. Получаем Common Name из Subject
     subject = x509_cert.subject
     cn_attrs = subject.get_attributes_for_oid(NameOID.COMMON_NAME)
