@@ -64,11 +64,16 @@ def get_certificate_info(domain: str) -> Certificate:
             cert_info.revoke_status = 4
             return cert_info
 
+
         # Проверяем по всем доступным CRL
+        revoked_found = False
+        error_download = False
+        error_scheme = False
         for url in cert_info.crl:
             parsed = urlparse(url)
             if parsed.scheme not in ('http', 'https'):
                 logger.debug(f"Пропускаем CRL с неподдерживаемым протоколом: {url}")
+                error_scheme = True
                 continue
 
             logger.debug(f"Загружаем CRL из {url}")
@@ -76,6 +81,7 @@ def get_certificate_info(domain: str) -> Certificate:
 
             if crl is None:
                 logger.warning(f"Не удалось загрузить CRL из {url}, пропускаем")
+                error_download = True
                 continue
 
             cert_info.add_crl_date(crl)
@@ -83,11 +89,18 @@ def get_certificate_info(domain: str) -> Certificate:
 
             if is_certificate_revoked(x509_cert, crl):
                 logger.info(f"Сертификат {domain} ОТОЗВАН (CRL: {url})")
-                cert_info.revoke_status = 1
-                return cert_info
+                revoked_found = True
+                break
+        if revoked_found:
+            cert_info.revoke_status = 1
+        elif error_download:
+            cert_info.revoke_status = 6
+        elif error_scheme:
+            cert_info.revoke_status = 6
+        else:
+            logger.info(f"Сертификат {domain} действителен (не найден в CRL)")
+            cert_info.revoke_status = 0
 
-        logger.info(f"Сертификат {domain} действителен (не найден в CRL)")
-        cert_info.revoke_status = 0
         return cert_info
 
     except Exception as e:
