@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import List
 from models import Certificate
 
@@ -21,6 +22,7 @@ def get_all_certs(certificates: List[Certificate]):
          logger.info(f"OBJ CREATE DATE: {cert.obj_create_date}")
 
 def get_all_certs_by_format(certificates: List[Certificate]):
+    print("Формат - Домен/ Кем выдан / дата создания")
     for cert in certificates:
         #print("---")
         #print(f"ИМЯ СЕРТИФИКАТА: {cert.cert_name}")
@@ -31,6 +33,9 @@ def get_all_certs_by_format(certificates: List[Certificate]):
 
         #print("---")
         #print(f"ИМЯ СЕРТИФИКАТА: {cert.cert_name}")
-        print(f"{cert.domain} /{cert.c_authority} /{cert.cert_create_date}")
+        date_str = str(cert.cert_create_date)  # "2026-07-16 13:00:00+00:00"
+        dt = datetime.fromisoformat(date_str)
+        formatted_date = dt.strftime('%d.%m.%Y')
+        print(f"{cert.domain} /{cert.c_authority} /{formatted_date}")
         #print(f"ОКОНЧАНИЯ СЕРТИФИКАТА: {cert.cert_end_date}")
 

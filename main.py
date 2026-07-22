@@ -67,7 +67,7 @@ def run_check(domains):
         cert_list.append(get_certificate_info(domain))
     certificate.save_certificates_to_file(cert_list, str(Path(__file__).resolve().parent / 'Json/certificate_date.json'))
     get_all_certs(cert_list)
-    #get_all_print(cert_list)
+    #get_all_certs_by_format(cert_list)
 
 ######## ONLY LINUX ########
 def recheck_by_scheduler():
